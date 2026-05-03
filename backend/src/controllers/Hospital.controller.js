@@ -12,6 +12,28 @@ export const signupHospital = async(req, res) => {
                 error: "All fields are required"
             })
         }
+        if(hospitalPhone.length !== 10){
+            return res.status(400).json({
+                success: false,
+                message: "Phone number must be 10 digits",
+                error: "Phone number must be 10 digits"
+            })
+        }
+        if(hospitalPassword.length < 6){
+            return res.status(400).json({
+                success: false,
+                message: "Password must be at least 6 characters long",
+                error: "Password must be at least 6 characters long"
+            })
+        }
+        if(/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/.test(hospitalEmail)){
+            return res.status(400).json({
+                success: false,
+                message: "Invalid email address",
+                error: "Invalid email address"
+            })
+        }
+
         const hospitalExist = await Hospitalinfo.findOne({ hospitalEmail })
         if(hospitalExist){
             return res.status(400).json({
@@ -21,14 +43,14 @@ export const signupHospital = async(req, res) => {
             })
         }
 
-        const password = await bcryptjs.hash(hospitalPassword, 10)
+        const salt = bcryptjs.genSalt(10)
+        const password = await bcryptjs.hash(hospitalPassword, salt)
         
         const hospitalSignup = await Hospitalinfo.create({ hospitalName, hospitalAddress, hospitalPhone, hospitalEmail, hospitalLogo, password }).select("-password")
 
         return res.status(201).json({
             success: true,
             message: "Hospital signup successful",
-            hospitalSignup
         })
 
     } catch (error) {
