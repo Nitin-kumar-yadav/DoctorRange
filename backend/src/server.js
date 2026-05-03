@@ -1,6 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import connectionDB from "./connection/db.js";
+import routerHospital from "./routes/Hospital.route.js";
 dotenv.config({ path: "./.env" });
 const app = express();
 
@@ -21,6 +22,9 @@ app.get("/api/v1/test", (req, res) => {
 app.get("/api/v1/health-check", (req, res) => {
     res.send({ message: "Health check passed" });
 });
+
+//TODO: Hospital route
+app.use("/api/v1/hospital",routerHospital);
 
 //TODO: Database connection
 

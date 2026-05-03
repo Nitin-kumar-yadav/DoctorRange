@@ -21,12 +21,18 @@ const hospitalSchema = new mongoose.Schema({
         unique: true,
         index: true
     },
-    logo: {
+    hospitalLogo: {
+        type: String,
+        required: true
+    },
+    hospitalPassword: {
         type: String,
         required: true
     },
 
 }, { timestamps: true });
+
+
 
 const Hospitalinfo = mongoose.model("Hospitalinfo", hospitalSchema);
 export default Hospitalinfo;
