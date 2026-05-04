@@ -59,3 +59,57 @@ export const signupHospital = async (req, res) => {
         })
     }
 }
+
+export const loginHospital = async (req, res) => {
+    try {
+        const { hospitalEmail, hospitalPassword } = req.body
+        if (!hospitalEmail || !hospitalPassword) {
+            return res.status(400).json({
+                success: false,
+                message: "All fields are required",
+                error: "All fields are required"
+            })
+        }
+        const hospitalExist = await Hospitalinfo.findOne({ hospitalEmail })
+        if (!hospitalExist) {
+            return res.status(404).json({
+                success: false,
+                message: "Hospital not found",
+                error: "Hospital not found"
+            })
+        }
+        const passwordMatch = await bcryptjs.compare(hospitalPassword, hospitalExist.password)
+        if (!passwordMatch) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid password",
+                error: "Invalid password"
+            })
+        }
+        const token = jwt.sign({ id: hospitalExist._id }, process.env.JWT_TOKEN, { expiresIn: "1d" })
+        res.cookie("hospitalToken", token, {
+            httpOnly: true,
+            secure: true,
+            sameSite: "strict",
+            maxAge: 24 * 60 * 60 * 1000
+        })
+        return res.status(200).json({
+            success: true,
+            message: "Hospital login successful",
+            hospital:{
+                id: hospitalExist._id,
+                hospitalName: hospitalExist.hospitalName,
+                hospitalAddress: hospitalExist.hospitalAddress,
+                hospitalPhone: hospitalExist.hospitalPhone,
+                hospitalEmail: hospitalExist.hospitalEmail,
+                hospitalLogo: hospitalExist.hospitalLogo,
+            }
+        })
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Hospital Login failed",
+            error: error.message
+        })
+    }
+}

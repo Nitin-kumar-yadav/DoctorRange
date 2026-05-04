@@ -5,5 +5,6 @@ const routerHospital = express.Router();
 
 
 routerHospital.post("/signup", signupHospital);
+routerHospital.post("/login", loginHospital);
 
 export default routerHospital;
