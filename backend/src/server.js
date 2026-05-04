@@ -4,6 +4,7 @@ import connectionDB from "./connection/db.js";
 import routerHospital from "./routes/Hospital.route.js";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import routerEmployee from "./routes/Employee.route.js";
 dotenv.config({ path: "./.env" });
 const app = express();
 
@@ -34,7 +35,10 @@ app.get("/api/v1/health-check", (req, res) => {
 });
 
 //TODO: Hospital route
-app.use("/api/v1/hospital",routerHospital);
+app.use("/api/v1/hospital", routerHospital);
+
+//TODO: Employee route
+app.use("/api/v1/employee", routerEmployee);
 
 //TODO: Database connection
 

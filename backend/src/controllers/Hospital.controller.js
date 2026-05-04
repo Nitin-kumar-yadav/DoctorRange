@@ -1,3 +1,4 @@
+import { generateTokenAndSetCookie } from "../lib/uitls.js"
 import Hospitalinfo from "../models/hospital.model.js"
 import bcryptjs from "bcryptjs"
 
@@ -86,13 +87,14 @@ export const loginHospital = async (req, res) => {
                 error: "Invalid password"
             })
         }
-        const token = jwt.sign({ id: hospitalExist._id }, process.env.JWT_TOKEN, { expiresIn: "1d" })
-        res.cookie("hospitalToken", token, {
-            httpOnly: true,
-            secure: true,
-            sameSite: "strict",
-            maxAge: 24 * 60 * 60 * 1000
-        })
+        const token = generateTokenAndSetCookie(hospitalExist._id, res);
+        if (!token) {
+            return res.status(400).json({
+                message: "Error while generating token",
+                success: false,
+                error: "Error while generating token",
+            });
+        }
         return res.status(200).json({
             success: true,
             message: "Hospital login successful",
