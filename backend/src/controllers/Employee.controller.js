@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
 import Employeesinfo from "../models/employees.model.js";
-import jwt from "jsonwebtoken";
 import { generateTokenAndSetCookie } from "../lib/uitls.js";
+import Hospitalinfo from "../models/hospital.model.js";
 
 export const employeeSignup = async (req, res) => {
     try {
@@ -12,6 +12,15 @@ export const employeeSignup = async (req, res) => {
                 message: "All fields are required",
                 success: false,
                 error: "All fields are required",
+            });
+        }
+
+        const checkHospital = await Hospitalinfo.findById(hospitalId);
+        if (!checkHospital) {
+            return res.status(404).json({
+                message: "Hospital not found",
+                success: false,
+                error: "Hospital not found",
             });
         }
 
