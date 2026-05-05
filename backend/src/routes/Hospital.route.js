@@ -30,7 +30,8 @@ const upload = multer({
     storage,
     fileFilter,
     limits: { fileSize: MAX_FILE_SIZE }
-}); const routerHospital = express.Router();
+});
+const routerHospital = express.Router();
 
 
 routerHospital.post("/signup", upload.single("hospitalLogo"), signupHospital);

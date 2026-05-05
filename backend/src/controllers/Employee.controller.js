@@ -5,9 +5,9 @@ import Hospitalinfo from "../models/hospital.model.js";
 
 export const employeeSignup = async (req, res) => {
     try {
-        const { fullName, phoneNumber, qualification, profilePicture, status, workshift, email, password, role, hospitalId } = req.body;
+        const { fullName, phoneNumber, qualification, profilePicture, status, email, password, role, hospitalId } = req.body;
 
-        if (!fullName || !phoneNumber || !qualification || !status || !workshift || !email || !password || !role || !hospitalId) {
+        if (!fullName || !phoneNumber || !qualification || !status || !email || !password || !role || !hospitalId) {
             return res.status(400).json({
                 message: "All fields are required",
                 success: false,
@@ -41,7 +41,6 @@ export const employeeSignup = async (req, res) => {
             qualification,
             profilePicture,
             status,
-            workshift,
             email,
             password: hashPassword,
             role,
@@ -64,6 +63,9 @@ export const employeeSignup = async (req, res) => {
             });
         }
 
+        checkHospital.employees.push(employee._id);
+        await checkHospital.save();
+
         return res.status(201).json({
             message: "Employee created successfully",
             success: true,
@@ -74,7 +76,6 @@ export const employeeSignup = async (req, res) => {
                 qualification: employee.qualification,
                 profilePicture: employee.profilePicture,
                 status: employee.status,
-                workshift: employee.workshift,
                 email: employee.email,
                 role: employee.role,
                 hospitalId: employee.hospitalId,
