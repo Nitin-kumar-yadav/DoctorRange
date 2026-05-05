@@ -34,7 +34,7 @@ const hospitalSchema = new mongoose.Schema({
             type: mongoose.Schema.Types.ObjectId,
             ref: "Employeesinfo"
         }
-    ]
+    ],
 }, { timestamps: true });
 
 

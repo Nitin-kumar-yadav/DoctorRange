@@ -1,16 +1,41 @@
 import { generateTokenAndSetCookie } from "../lib/uitls.js"
 import Hospitalinfo from "../models/hospital.model.js"
 import bcryptjs from "bcryptjs"
+import { v2 as cloudinary } from 'cloudinary'
+import fs from "fs"
+import dotenv from "dotenv"
+dotenv.config()
+
 
 export const signupHospital = async (req, res) => {
+
+    try {
+        cloudinary.config({
+            cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+            api_key: process.env.CLOUDINARY_API_KEY,
+            api_secret: process.env.CLOUDINARY_API_SECRET,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            message: "Error while connecting to cloudinary",
+            success: false,
+            error: error.message,
+        });
+    }
     try {
 
-        const { hospitalName, hospitalAddress, hospitalPhone, hospitalEmail, hospitalLogo, hospitalPassword, } = req.body
-        if (!hospitalName || !hospitalAddress || !hospitalPhone || !hospitalEmail || !hospitalLogo || !hospitalPassword) {
+        const { hospitalName, hospitalAddress, hospitalPhone, hospitalEmail, hospitalPassword } = req.body
+        const hospitalLogo = req.file
+
+        const requiredFields = { hospitalName, hospitalAddress, hospitalPhone, hospitalEmail, hospitalPassword }
+        const missingFields = Object.keys(requiredFields).filter(field => !requiredFields[field])
+        if (!hospitalLogo) missingFields.push("hospitalLogo")
+
+        if (missingFields.length > 0) {
             return res.status(400).json({
                 success: false,
-                message: "All fields are required",
-                error: "All fields are required"
+                message: `All fields are required. Missing fields: ${missingFields.join(", ")}`,
+                error: `Missing fields: ${missingFields.join(", ")}`
             })
         }
         if (!/^\d{10}$/.test(hospitalPhone)) {
@@ -44,8 +69,16 @@ export const signupHospital = async (req, res) => {
         }
 
         const salt = await bcryptjs.genSalt(10)
-        const password = await bcryptjs.hash(hospitalPassword, salt)
-        await Hospitalinfo.create({ hospitalName, hospitalAddress, hospitalPhone, hospitalEmail, hospitalLogo, password })
+        const hashedPassword = await bcryptjs.hash(hospitalPassword, salt)
+        const result = await cloudinary.uploader.upload(hospitalLogo.path, {
+            folder: "DoctorsRange",
+            resource_type: "auto",
+        })
+
+        // Remove the temp file from local uploads folder
+        fs.unlinkSync(hospitalLogo.path)
+
+        await Hospitalinfo.create({ hospitalName, hospitalAddress, hospitalPhone, hospitalEmail, hospitalLogo: result.secure_url, hospitalPassword: hashedPassword })
 
         return res.status(201).json({
             success: true,
@@ -64,11 +97,15 @@ export const signupHospital = async (req, res) => {
 export const loginHospital = async (req, res) => {
     try {
         const { hospitalEmail, hospitalPassword } = req.body
-        if (!hospitalEmail || !hospitalPassword) {
+
+        const requiredFields = { hospitalEmail, hospitalPassword }
+        const missingFields = Object.keys(requiredFields).filter(field => !requiredFields[field])
+
+        if (missingFields.length > 0) {
             return res.status(400).json({
                 success: false,
-                message: "All fields are required",
-                error: "All fields are required"
+                message: `All fields are required. Missing fields: ${missingFields.join(", ")}`,
+                error: `Missing fields: ${missingFields.join(", ")}`
             })
         }
         const hospitalExist = await Hospitalinfo.findOne({ hospitalEmail })
@@ -79,7 +116,7 @@ export const loginHospital = async (req, res) => {
                 error: "Hospital not found"
             })
         }
-        const passwordMatch = await bcryptjs.compare(hospitalPassword, hospitalExist.password)
+        const passwordMatch = await bcryptjs.compare(hospitalPassword, hospitalExist.hospitalPassword)
         if (!passwordMatch) {
             return res.status(400).json({
                 success: false,
@@ -98,7 +135,7 @@ export const loginHospital = async (req, res) => {
         return res.status(200).json({
             success: true,
             message: "Hospital login successful",
-            hospital:{
+            hospital: {
                 id: hospitalExist._id,
                 hospitalName: hospitalExist.hospitalName,
                 hospitalAddress: hospitalExist.hospitalAddress,
