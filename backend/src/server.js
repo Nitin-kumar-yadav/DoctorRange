@@ -7,6 +7,7 @@ import cors from "cors";
 import routerEmployee from "./routes/Employee.route.js";
 dotenv.config({ path: "./.env" });
 const app = express();
+app.use(express.json());
 
 if (!process.env.PORT) {
     console.error("PORT is not defined");
@@ -17,11 +18,11 @@ app.use(cors({
     origin: "*",
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"]
+    allowedHeaders: ["Content-Type", "Authorization"],
+    preflightContinue: false,
+    optionsSuccessStatus: 200,
 }))
-
 app.use(cookieParser());
-app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 //TODO: Test API

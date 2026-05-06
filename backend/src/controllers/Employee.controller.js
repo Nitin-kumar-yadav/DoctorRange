@@ -1,17 +1,42 @@
 import bcrypt from "bcryptjs";
+import fs from "fs";
 import Employeesinfo from "../models/employees.model.js";
 import { generateTokenAndSetCookie } from "../lib/uitls.js";
 import Hospitalinfo from "../models/hospital.model.js";
+import { v2 as cloudinary } from "cloudinary";
 
 export const employeeSignup = async (req, res) => {
+
     try {
-        const { fullName, phoneNumber, qualification, profilePicture, status, email, password, role, hospitalId } = req.body;
+        cloudinary.config({
+            cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+            api_key: process.env.CLOUDINARY_API_KEY,
+            api_secret: process.env.CLOUDINARY_API_SECRET,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            message: "Error while connecting to cloudinary",
+            success: false,
+            error: error.message,
+        });
+    }
+
+    try {
+        const { fullName, phoneNumber, qualification, status, email, password, role, hospitalId, profilePicture } = req.body;
 
         if (!fullName || !phoneNumber || !qualification || !status || !email || !password || !role || !hospitalId) {
             return res.status(400).json({
                 message: "All fields are required",
                 success: false,
                 error: "All fields are required",
+            });
+        }
+
+        if (!req.file) {
+            return res.status(400).json({
+                message: "Profile picture is required",
+                success: false,
+                error: "Profile picture is required",
             });
         }
 
@@ -39,7 +64,7 @@ export const employeeSignup = async (req, res) => {
             fullName,
             phoneNumber,
             qualification,
-            profilePicture,
+            profilePicture: [],
             status,
             email,
             password: hashPassword,
@@ -53,6 +78,16 @@ export const employeeSignup = async (req, res) => {
                 error: "Error while employeeSignup",
             });
         }
+
+        const cloudinaryUpload = await cloudinary.uploader.upload(req.file.path, {
+            folder: "DoctorsRange",
+            resource_type: "auto",
+        })
+
+        fs.unlinkSync(req.file.path)
+
+        employee.profilePicture = cloudinaryUpload.secure_url;
+        await employee.save();
 
         const token = generateTokenAndSetCookie(employee._id, res);
         if (!token) {
@@ -93,7 +128,7 @@ export const employeeSignup = async (req, res) => {
 
 export const employeeLogin = async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const { email, password } = req.body || {};
         if (!email || !password) {
             return res.status(400).json({
                 message: "All fields are required",

@@ -27,7 +27,7 @@ const employeesSchema = new mongoose.Schema({
         required: false
     },
     profilePicture: {
-        type: String,
+        type: [String],
     },
     status: {
         type: String,
@@ -35,12 +35,12 @@ const employeesSchema = new mongoose.Schema({
         default: "active",
         required: true
     },
-    workshift: {
-        type: String,
-        enum: ["morning", "evening", "night"],
-        default: "morning",
-        required: true
-    },
+    // workshift: {
+    //     type: String,
+    //     enum: ["Shift A", "Shift B", "Shift C"],
+    //     default: "morning",
+    //     required: true
+    // },
     //TODO: Employee Login Credentials
     email: {
         type: String,
@@ -61,7 +61,7 @@ const employeesSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     }
-    
+
 })
 
 const Employeesinfo = mongoose.model("Employeesinfo", employeesSchema);
