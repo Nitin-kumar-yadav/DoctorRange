@@ -27,7 +27,8 @@ const employeesSchema = new mongoose.Schema({
         required: false
     },
     profilePicture: {
-        type: [String],
+        type: String,
+        default: ""
     },
     status: {
         type: String,

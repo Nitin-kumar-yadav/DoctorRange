@@ -64,7 +64,7 @@ export const employeeSignup = async (req, res) => {
             fullName,
             phoneNumber,
             qualification,
-            profilePicture: [],
+            profilePicture,
             status,
             email,
             password: hashPassword,
