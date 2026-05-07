@@ -1,8 +1,24 @@
 import Employeesinfo from "../models/employees.model.js";
 import Hospitalinfo from "../models/hospital.model.js";
+import { v2 as cloudinary } from "cloudinary";
 
 
 export const registerPatient = async (req, res) => {
+
+    try {
+        cloudinary.config({
+            cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+            api_key: process.env.CLOUDINARY_API_KEY,
+            api_secret: process.env.CLOUDINARY_API_SECRET,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            message: "Error while connecting to cloudinary",
+            success: false,
+            error: error.message,
+        });
+    }
+
     try {
         const { hospitalId, patientName, patientAge, patientEmail, patientPhone, patientAddress, patientGender, patientBloodGroup, patientAllergies, patientMedications, patientProfilePicture, patientStatus } = req.body;
 
