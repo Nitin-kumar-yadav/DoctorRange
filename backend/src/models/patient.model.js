@@ -7,6 +7,12 @@ const patientSchema = new mongoose.Schema({
         index: true,
         required: true
     },
+    hospitalEmployeeId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Employeeinfo",
+        index: true,
+        required: true
+    },
     patientName: {
         type: String,
         required: true
@@ -47,13 +53,24 @@ const patientSchema = new mongoose.Schema({
     patientProfilePicture: {
         type: String,
     },
-    createdAt: {
+    patientAdmittedAt: {
         type: Date,
         default: Date.now
     },
-    updatedAt: {
+    patientDischargedAt: {
         type: Date,
         default: Date.now
+    },
+    patientStatus: {
+        type: String,
+        enum: ["admitted", "discharged"],
+        default: "admitted"
+    },
+    patientAdmittedBy:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Employeeinfo",
+        index: true,
+        required: true
     }
     
 })
