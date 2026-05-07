@@ -29,6 +29,10 @@ export const registerPatient = async (req, res) => {
             return res.status(400).json({ message: "Hospital not found" });
         }
 
+        // Verify employee belongs to this hospital
+        if (employeeData.hospitalId?.toString() !== hospitalId) {
+            return res.status(403).json({ message: "You are not authorized to register patients for this hospital" });
+        }
 
 
         const patient = new Patientinfo({
@@ -49,19 +53,11 @@ export const registerPatient = async (req, res) => {
         if (patient.patientStatus === "admitted") {
             patient.patientAdmittedAt = Date.now();
         }
-        if (patient.patientStatus === "discharged") {
-            patient.patientDischargedAt = Date.now();
-        }
-
-        if (patient) {
-            await patient.save();
-            return res.status(200).json({ message: "Patient registered successfully" });
-        }
-        else {
-            return res.status(400).json({ message: "Patient not registered" });
-        }
+        await patient.save();
+        return res.status(201).json({ message: "Patient registered successfully", patient });
 
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error("Patient registration error:", error);
+        res.status(500).json({ message: "An error occurred while registering the patient" });
     }
 }
