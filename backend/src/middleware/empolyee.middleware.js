@@ -2,9 +2,8 @@ import jwt from "jsonwebtoken"
 import Employeesinfo from "../models/employees.model.js";
 
 export const employeeAuthMiddleware = async (req, res, next) => {
-    let decodedToken;
     try {
-        const token = req?.cookies?.employeeToken || req.header("Authorization").replace("Bearer ", "");
+        const token = req?.cookies?.token || req.header("Authorization")?.replace("Bearer ", "");
         if (!token) {
             return res.status(401).json({
                 success: false,
@@ -12,19 +11,26 @@ export const employeeAuthMiddleware = async (req, res, next) => {
                 error: "No token provided"
             })
         }
-        decodedToken = jwt.verify(token, process.env.JWT_TOKEN)
+        const decodedToken = jwt.verify(token, process.env.JWT_TOKEN)
         const employee = await Employeesinfo.findById(decodedToken?.id).select("-password")
         if (!employee) {
-            return res.status(404).json({
+            return res.status(401).json({
                 success: false,
-                message: "Employee not found",
-                error: "Employee not found"
+                message: "Unauthorized",
+                error: "Invalid token - employee not found"
             })
         }
-        req.employee = employee
+        req.user = employee
         next()
     } catch (error) {
-        res.status(500).json({
+        if (error.name === "JsonWebTokenError" || error.name === "TokenExpiredError") {
+            return res.status(401).json({
+                success: false,
+                message: "Unauthorized",
+                error: "Invalid or expired token"
+            })
+        }
+        return res.status(500).json({
             success: false,
             message: "Internal server error in employeeAuthMiddleware",
             error: error.message

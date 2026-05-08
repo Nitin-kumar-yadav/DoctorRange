@@ -6,24 +6,17 @@ export const generateTokenAndSetCookie = (id, res) => {
     try {
         const token = jwt.sign({ id }, process.env.JWT_TOKEN, { expiresIn: "1d" });
         if (!token) {
-            return res.status(400).json({
-                message: "Error while generating token",
-                success: false,
-                error: "Error while generating token",
-            });
+            return null;
         }
         res.cookie("token", token, {
             httpOnly: true,
-            secure: true,
+            secure: process.env.NODE_ENV === "production",
             maxAge: 30 * 24 * 60 * 60 * 1000,
             sameSite: "strict"
         });
-        return token
+        return token;
     } catch (error) {
-        return res.status(500).json({
-            message: "Error while tokenGenerator",
-            success: false,
-            error: error.message,
-        });
+        console.error("Error generating token:", error.message);
+        return null;
     }
 }

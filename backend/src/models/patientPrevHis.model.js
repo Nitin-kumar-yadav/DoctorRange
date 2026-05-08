@@ -8,19 +8,10 @@ const patientPrevHisSchema = new mongoose.Schema({
         index: true
     },
     previousMedicalHistory: {
-        type: [],
-        of: String,
+        type: [String],
         default: []
     },
-    createdAt: {
-        type: Date,
-        default: Date.now
-    },
-    updatedAt: {
-        type: Date,
-        default: Date.now
-    }
-})
+}, { timestamps: true })
 
 const PatientPrevHis = mongoose.model("PatientPrevHis", patientPrevHisSchema);
 export default PatientPrevHis;

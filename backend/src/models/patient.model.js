@@ -9,7 +9,7 @@ const patientSchema = new mongoose.Schema({
     },
     hospitalEmployeeId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Employeeinfo",
+        ref: "Employeesinfo",
         index: true,
         required: true
     },
@@ -43,37 +43,36 @@ const patientSchema = new mongoose.Schema({
         type: String,
     },
     patientAllergies: {
-        type: [],
-        of: String
+        type: [String],
+        default: []
     },
     patientMedications: {
-        type: [],
-        of: String
+        type: [String],
+        default: []
     },
     patientProfilePicture: {
         type: String,
     },
     patientAdmittedAt: {
         type: Date,
-        default: Date.now
+        default: null
     },
     patientDischargedAt: {
         type: Date,
-        default: Date.now
+        default: null
     },
     patientStatus: {
         type: String,
         enum: ["admitted", "discharged"],
         default: "admitted"
     },
-    patientAdmittedBy:{
+    patientAdmittedBy: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Employeeinfo",
+        ref: "Employeesinfo",
         index: true,
-        required: true
     }
-    
-})
+
+}, { timestamps: true })
 
 const Patientinfo = mongoose.model("Patientinfo", patientSchema);
 export default Patientinfo;

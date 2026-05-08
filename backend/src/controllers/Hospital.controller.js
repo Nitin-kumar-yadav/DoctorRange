@@ -24,7 +24,7 @@ export const signupHospital = async (req, res) => {
     }
     try {
 
-        const { hospitalName, hospitalAddress, hospitalPhone, hospitalEmail, hospitalPassword } = req.body
+        const { hospitalName, hospitalAddress, hospitalPhone, hospitalEmail, hospitalPassword } = req.body || {}
         const hospitalLogo = req.file
 
         const requiredFields = { hospitalName, hospitalAddress, hospitalPhone, hospitalEmail, hospitalPassword }
@@ -86,7 +86,8 @@ export const signupHospital = async (req, res) => {
         })
 
     } catch (error) {
-        res.status(500).json({
+        console.error("Error in signupHospital:", error);
+        return res.status(500).json({
             success: false,
             message: "Hospital Signup failed",
             error: error.message
@@ -96,37 +97,35 @@ export const signupHospital = async (req, res) => {
 
 export const loginHospital = async (req, res) => {
     try {
-        const { hospitalEmail, hospitalPassword } = req.body
+        const { hospitalEmail, hospitalPassword } = req.body || {}
 
-        const requiredFields = { hospitalEmail, hospitalPassword }
-        const missingFields = Object.keys(requiredFields).filter(field => !requiredFields[field])
-
-        if (missingFields.length > 0) {
+        if (!hospitalEmail || !hospitalPassword) {
             return res.status(400).json({
                 success: false,
-                message: `All fields are required. Missing fields: ${missingFields.join(", ")}`,
-                error: `Missing fields: ${missingFields.join(", ")}`
+                message: "All fields are required",
+                error: "Email and password are required"
             })
         }
+
         const hospitalExist = await Hospitalinfo.findOne({ hospitalEmail })
         if (!hospitalExist) {
-            return res.status(404).json({
+            return res.status(401).json({
                 success: false,
-                message: "Hospital not found",
-                error: "Hospital not found"
+                message: "Invalid credentials",
+                error: "Invalid email or password"
             })
         }
         const passwordMatch = await bcryptjs.compare(hospitalPassword, hospitalExist.hospitalPassword)
         if (!passwordMatch) {
-            return res.status(400).json({
+            return res.status(401).json({
                 success: false,
-                message: "Invalid password",
-                error: "Invalid password"
+                message: "Invalid credentials",
+                error: "Invalid email or password"
             })
         }
         const token = generateTokenAndSetCookie(hospitalExist._id, res);
         if (!token) {
-            return res.status(400).json({
+            return res.status(500).json({
                 message: "Error while generating token",
                 success: false,
                 error: "Error while generating token",
@@ -145,7 +144,8 @@ export const loginHospital = async (req, res) => {
             }
         })
     } catch (error) {
-        res.status(500).json({
+        console.error("Error in loginHospital:", error);
+        return res.status(500).json({
             success: false,
             message: "Hospital Login failed",
             error: error.message

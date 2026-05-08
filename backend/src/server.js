@@ -8,7 +8,7 @@ import routerEmployee from "./routes/Employee.route.js";
 import patientRouter from "./routes/patient.route.js";
 dotenv.config({ path: "./.env" });
 const app = express();
-app.use(express.json());
+
 
 if (!process.env.PORT) {
     console.error("PORT is not defined");
@@ -16,7 +16,7 @@ if (!process.env.PORT) {
 }
 
 app.use(cors({
-    origin: "*",
+    origin: process.env.CORS_ORIGIN || "*",
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -24,7 +24,8 @@ app.use(cors({
     optionsSuccessStatus: 200,
 }))
 app.use(cookieParser());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 
 //TODO: Test API
 app.get("/api/v1/test", (req, res) => {
@@ -45,9 +46,17 @@ app.use("/api/v1/employee", routerEmployee);
 //TODO: Patient route
 app.use("/api/v1/patient", patientRouter);
 
-//TODO: Database connection
+//TODO: Database connection & Server start
+const startServer = async () => {
+    try {
+        await connectionDB();
+        app.listen(process.env.PORT, () => {
+            console.log(`Server is running on port ${process.env.PORT}`);
+        });
+    } catch (error) {
+        console.error("Failed to start server:", error);
+        process.exit(1);
+    }
+};
 
-app.listen(process.env.PORT, () => {
-    connectionDB();
-    console.log(`Server is running on port ${process.env.PORT}`);
-});
+startServer();

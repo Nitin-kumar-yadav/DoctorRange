@@ -8,24 +8,14 @@ const patientDisease = new mongoose.Schema({
         index: true
     },
     diseaseName: {
-        type: [],
-        of: String,
+        type: [String],
         required: true
     },
     diagnosisMedicines: {
-        type: [],
-        of: String,
+        type: [String],
         required: true
     },
-    createdAt: {
-        type: Date,
-        default: Date.now
-    },
-    updatedAt: {
-        type: Date,
-        default: Date.now
-    }
-});
+}, { timestamps: true });
 
 const PatientDisease = mongoose.model("PatientDisease", patientDisease);
 export default PatientDisease;

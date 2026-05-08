@@ -22,7 +22,7 @@ export const employeeSignup = async (req, res) => {
     }
 
     try {
-        const { fullName, phoneNumber, qualification, status, email, password, role, hospitalId, profilePicture } = req.body;
+        const { fullName, phoneNumber, qualification, status, email, password, role, hospitalId } = req.body || {};
 
         if (!fullName || !phoneNumber || !qualification || !status || !email || !password || !role || !hospitalId) {
             return res.status(400).json({
@@ -42,6 +42,8 @@ export const employeeSignup = async (req, res) => {
 
         const checkHospital = await Hospitalinfo.findById(hospitalId);
         if (!checkHospital) {
+            // Clean up uploaded file since we won't need it
+            if (req.file?.path) fs.unlinkSync(req.file.path);
             return res.status(404).json({
                 message: "Hospital not found",
                 success: false,
@@ -51,20 +53,32 @@ export const employeeSignup = async (req, res) => {
 
         let employee = await Employeesinfo.findOne({ email });
         if (employee) {
+            // Clean up uploaded file since we won't need it
+            if (req.file?.path) fs.unlinkSync(req.file.path);
             return res.status(400).json({
                 message: "Employee already exists",
                 success: false,
                 error: "Employee already exists",
             });
         }
-        let salt = await bcrypt.genSalt(10);
+
+        // Upload to cloudinary first, before creating DB record
+        const cloudinaryUpload = await cloudinary.uploader.upload(req.file.path, {
+            folder: "DoctorsRange",
+            resource_type: "auto",
+        })
+
+        // Remove the temp file from local uploads folder
+        fs.unlinkSync(req.file.path)
+
+        const salt = await bcrypt.genSalt(10);
         const hashPassword = await bcrypt.hash(password, salt);
 
         employee = await Employeesinfo.create({
             fullName,
             phoneNumber,
             qualification,
-            profilePicture,
+            profilePicture: cloudinaryUpload.secure_url,
             status,
             email,
             password: hashPassword,
@@ -79,19 +93,9 @@ export const employeeSignup = async (req, res) => {
             });
         }
 
-        const cloudinaryUpload = await cloudinary.uploader.upload(req.file.path, {
-            folder: "DoctorsRange",
-            resource_type: "auto",
-        })
-
-        fs.unlinkSync(req.file.path)
-
-        employee.profilePicture = cloudinaryUpload.secure_url;
-        await employee.save();
-
         const token = generateTokenAndSetCookie(employee._id, res);
         if (!token) {
-            return res.status(400).json({
+            return res.status(500).json({
                 message: "Error while generating token",
                 success: false,
                 error: "Error while generating token",
@@ -118,6 +122,11 @@ export const employeeSignup = async (req, res) => {
         });
 
     } catch (error) {
+        // Clean up uploaded file on any error
+        if (req.file?.path) {
+            try { fs.unlinkSync(req.file.path); } catch (_) { /* file may already be deleted */ }
+        }
+        console.error("Error in employeeSignup:", error);
         return res.status(500).json({
             message: "Error while employeeSignup",
             success: false,
@@ -129,51 +138,43 @@ export const employeeSignup = async (req, res) => {
 export const employeeLogin = async (req, res) => {
     try {
         const { email, password } = req.body || {};
+
         if (!email || !password) {
             return res.status(400).json({
                 message: "All fields are required",
                 success: false,
-                error: "All fields are required",
+                error: "Email and password are required",
             });
         }
-        if (password.length < 6) {
-            return res.status(400).json({
-                message: "Password must be at least 6 characters long",
-                success: false,
-                error: "Password must be at least 6 characters long",
-            });
-        }
-        if (!/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/.test(email)) {
-            return res.status(400).json({
-                message: "Invalid email address",
-                success: false,
-                error: "Invalid email address",
-            });
-        }
+
         const employee = await Employeesinfo.findOne({ email });
+
         if (!employee) {
-            return res.status(404).json({
-                message: "Employee not found",
+            return res.status(401).json({
+                message: "Invalid credentials",
                 success: false,
-                error: "Employee not found",
+                error: "Invalid email",
             });
         }
+
         const passwordMatch = await bcrypt.compare(password, employee.password);
         if (!passwordMatch) {
-            return res.status(400).json({
-                message: "Invalid password",
+            return res.status(401).json({
+                message: "Invalid credentials",
                 success: false,
                 error: "Invalid password",
             });
         }
+
         const token = generateTokenAndSetCookie(employee._id, res);
         if (!token) {
-            return res.status(400).json({
+            return res.status(500).json({
                 message: "Error while generating token",
                 success: false,
                 error: "Error while generating token",
             });
         }
+
         return res.status(200).json({
             message: "Employee login successful",
             success: true,
@@ -184,13 +185,13 @@ export const employeeLogin = async (req, res) => {
                 qualification: employee.qualification,
                 profilePicture: employee.profilePicture,
                 status: employee.status,
-                workshift: employee.workshift,
                 email: employee.email,
                 role: employee.role,
                 hospitalId: employee.hospitalId,
             }
         });
     } catch (error) {
+        console.error("Error in employeeLogin:", error);
         return res.status(500).json({
             message: "Error while employeeLogin",
             success: false,

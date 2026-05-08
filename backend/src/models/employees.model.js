@@ -54,16 +54,8 @@ const employeesSchema = new mongoose.Schema({
         required: true,
         minlength: 6
     },
-    createdAt: {
-        type: Date,
-        default: Date.now
-    },
-    updatedAt: {
-        type: Date,
-        default: Date.now
-    }
 
-})
+}, { timestamps: true })
 
 const Employeesinfo = mongoose.model("Employeesinfo", employeesSchema);
 export default Employeesinfo;
