@@ -90,6 +90,7 @@ export const registerPatient = async (req, res) => {
 
         // Handle profile picture upload
         let patientProfilePicture = "";
+        let cloudinaryPublicId = null;
         if (req.file) {
             const cloudinaryUpload = await cloudinary.uploader.upload(req.file.path, {
                 folder: "DoctorsRange",
@@ -97,6 +98,7 @@ export const registerPatient = async (req, res) => {
             });
             fs.unlinkSync(req.file.path);
             patientProfilePicture = cloudinaryUpload.secure_url;
+            cloudinaryPublicId = cloudinaryUpload.public_id;
         }
 
         const patient = new Patientinfo({
@@ -118,7 +120,14 @@ export const registerPatient = async (req, res) => {
         if (patient.patientStatus === "admitted") {
             patient.patientAdmittedAt = Date.now();
         }
-        await patient.save();
+        try {
+            await patient.save();
+        } catch (saveError) {
+            if (cloudinaryPublicId) {
+                await cloudinary.uploader.destroy(cloudinaryPublicId).catch(() => { });
+            }
+            throw saveError;
+        }
 
         return res.status(201).json({
             message: "Patient registered successfully",
@@ -135,7 +144,7 @@ export const registerPatient = async (req, res) => {
         return res.status(500).json({
             message: "An error occurred while registering the patient",
             success: false,
-            error: error.message
+            error: "Internal server error"
         });
     }
 }

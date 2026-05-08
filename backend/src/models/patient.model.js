@@ -63,8 +63,8 @@ const patientSchema = new mongoose.Schema({
     },
     patientStatus: {
         type: String,
-        enum: ["admitted", "discharged"],
-        default: "admitted"
+        enum: ["registered", "admitted", "discharged"],
+        default: "registered"
     },
     patientAdmittedBy: {
         type: mongoose.Schema.Types.ObjectId,
