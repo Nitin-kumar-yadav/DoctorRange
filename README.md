@@ -23,7 +23,7 @@ Instead of relying on rigid, hardcoded arrays, the system uses a combination of 
 
 #### 1. Facility & Administration
 * **`Hospital`**: The foundational entity. All staff, patients, and appointments are tied to a specific hospital ID, allowing this single database to serve multiple hospital locations simultaneously.
-* **`Manager`**: High-level administrative users responsible for hospital oversight.
+* **` Manager`**: High-level administrative users responsible for hospital oversight.
 * **`Staff`**: Operational users (e.g., receptionists, nurses, admins) who handle day-to-day tasks like patient registration.
 
 #### 2. Clinical Operations
@@ -56,4 +56,4 @@ To prevent database bloat and ensure fast query times, patient medical data is s
 
 1. Clone the repository:
    ```bash
-   git clone [https://github.com/yourusername/your-repo-name.git](https://github.com/yourusername/your-repo-name.git)
+   git clone [https://github.com/Nitin-kumar-yadav/DoctorRange.git](https://github.com/Nitin-kumar-yadav/DoctorRange.git)
