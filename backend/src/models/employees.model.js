@@ -26,7 +26,7 @@ const employeesSchema = new mongoose.Schema({
         type: String,
         required: false
     },
-    profilePicture: {
+    employeeProfilePicture: {
         type: String,
         default: ""
     },

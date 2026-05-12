@@ -4,8 +4,8 @@ import upload from "../lib/upload.js";
 
 const routerEmployee = express.Router();
 
-routerEmployee.post("/signup", upload.single("profilePicture"), employeeSignup);
+routerEmployee.post("/signup", upload.single("employeeProfilePicture"), employeeSignup);
 
-routerEmployee.post("/login", upload.none(), employeeLogin);
+routerEmployee.post("/login", employeeLogin);
 
 export default routerEmployee;
