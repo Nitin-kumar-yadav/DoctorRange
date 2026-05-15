@@ -7,9 +7,11 @@ const patientPrevHisSchema = new mongoose.Schema({
         required: true,
         index: true
     },
-    previousMedicalHistory: {
-        type: [String],
-        default: []
+    hospitalId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Hospitalinfo",
+        required: true,
+        index: true
     },
 }, { timestamps: true })
 

@@ -152,3 +152,7 @@ export const loginHospital = async (req, res) => {
         })
     }
 }
+
+export const updateHospital = async (req, res) => {
+    
+}

@@ -148,3 +148,51 @@ export const registerPatient = async (req, res) => {
         });
     }
 }
+
+export const patientDisease = async (req, res) => {
+    try {
+        const { diseaseName, diagnosisMedicines } = req.body || {};
+        const employeeId = req.user?._id;
+        if (!employeeId || !diseaseName || !diagnosisMedicines) {
+            return res.status(400).json({
+                message: "Required fields are missing",
+                success: false,
+                error: "employeeId and disease are required"
+            });
+        }
+        const employeeData = await Employeesinfo.findById(employeeId);
+        if (!employeeData) {
+            return res.status(404).json({
+                message: "Employee not found",
+                success: false,
+                error: "Employee not found"
+            });
+        }
+        const patientData = await Patientinfo.findById(employeeData.patientId);
+        if (!patientData) {
+            return res.status(404).json({
+                message: "Patient not found",
+                success: false,
+                error: "Patient not found"
+            });
+        }
+        const disease = await PatientPrevHis.create({
+            patientDiseaseId: patientData._id,
+            hospitalId: employeeData.hospitalId,
+            diseaseName,
+            diagnosisMedicines,
+        });
+        return res.status(200).json({
+            message: "Patient disease updated successfully",
+            success: true,
+            disease
+        });
+    } catch (error) {
+        console.error("Patient disease error:", error);
+        return res.status(500).json({
+            message: "An error occurred while updating patient disease",
+            success: false,
+            error: "Internal server error"
+        });
+    }
+}
