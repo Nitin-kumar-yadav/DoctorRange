@@ -6,6 +6,6 @@ import { employeeAuthMiddleware } from "../middleware/empolyee.middleware.js";
 const patientRouter = express.Router();
 
 patientRouter.post("/register", employeeAuthMiddleware, upload.single("patientProfilePicture"), registerPatient)
-patientRouter.post('/disease', employeeAuthMiddleware, patientDisease)    
+patientRouter.post('/disease', employeeAuthMiddleware, patientDisease)
 
 export default patientRouter;

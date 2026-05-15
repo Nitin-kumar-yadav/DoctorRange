@@ -1,6 +1,8 @@
 import Employeesinfo from "../models/employees.model.js";
 import Hospitalinfo from "../models/hospital.model.js";
 import Patientinfo from "../models/patient.model.js";
+import PatientDisease from "../models/patientDisease.model.js";
+import PatientPrevHis from "../models/patientPrevHis.model.js";
 import { v2 as cloudinary } from "cloudinary";
 import fs from "fs";
 
@@ -151,15 +153,27 @@ export const registerPatient = async (req, res) => {
 
 export const patientDisease = async (req, res) => {
     try {
-        const { diseaseName, diagnosisMedicines } = req.body || {};
+        const { diseaseName, diagnosisMedicines, patientId } = req.body || {};
         const employeeId = req.user?._id;
-        if (!employeeId || !diseaseName || !diagnosisMedicines) {
+
+        // Helper function to check if a value is missing or an empty array
+        const isInvalid = (val) => !val || (Array.isArray(val) && val.length === 0);
+
+        // 1. Improved Validation
+        if (isInvalid(diseaseName) || isInvalid(diagnosisMedicines) || !patientId) {
+            let errorDetail = "Required fields are missing";
+            if (isInvalid(diseaseName)) errorDetail = "diseaseName is required";
+            else if (isInvalid(diagnosisMedicines)) errorDetail = "diagnosisMedicines is required";
+            else if (!patientId) errorDetail = "patientId is required";
+
             return res.status(400).json({
                 message: "Required fields are missing",
                 success: false,
-                error: "employeeId and disease are required"
+                error: errorDetail
             });
         }
+
+        // 2. Fetch Employee
         const employeeData = await Employeesinfo.findById(employeeId);
         if (!employeeData) {
             return res.status(404).json({
@@ -168,7 +182,9 @@ export const patientDisease = async (req, res) => {
                 error: "Employee not found"
             });
         }
-        const patientData = await Patientinfo.findById(employeeData.patientId);
+
+        // 3. Fetch Patient
+        const patientData = await Patientinfo.findById(patientId);
         if (!patientData) {
             return res.status(404).json({
                 message: "Patient not found",
@@ -176,17 +192,27 @@ export const patientDisease = async (req, res) => {
                 error: "Patient not found"
             });
         }
-        const disease = await PatientPrevHis.create({
-            patientDiseaseId: patientData._id,
-            hospitalId: employeeData.hospitalId,
-            diseaseName,
-            diagnosisMedicines,
+
+        // 4. Create Record (Fixed Array Wrapping Bug)
+        const disease = await PatientDisease.create({
+            patientId: patientData._id,
+            diseaseName: Array.isArray(diseaseName) ? diseaseName : [diseaseName],
+            diagnosisMedicines: Array.isArray(diagnosisMedicines) ? diagnosisMedicines : [diagnosisMedicines],
         });
-        return res.status(200).json({
+
+        // 5. Create Previous History Record
+        await PatientPrevHis.create({
+            patientDiseaseId: disease._id,
+            hospitalId: employeeData.hospitalId,
+        });
+
+        // 6. Success Response
+        return res.status(201).json({
             message: "Patient disease updated successfully",
             success: true,
             disease
         });
+
     } catch (error) {
         console.error("Patient disease error:", error);
         return res.status(500).json({
@@ -195,4 +221,4 @@ export const patientDisease = async (req, res) => {
             error: "Internal server error"
         });
     }
-}
+};
