@@ -1,7 +1,7 @@
 import express from "express";
 import { loginHospital, signupHospital, updateHospital } from "../controllers/Hospital.controller.js";
 import upload from "../lib/upload.js";
-// import { authMiddleware } from "../middlewares/auth.js";
+import { hospitalAuthMiddleware } from "../middleware/hospital.middleware.js";
 
 const routerHospital = express.Router();
 
@@ -10,7 +10,6 @@ routerHospital.post("/signup", upload.single("hospitalLogo"), signupHospital);
 routerHospital.post("/login", loginHospital);
 
 //TODO: Update Hospital route
+routerHospital.patch("/update/:id", hospitalAuthMiddleware, updateHospital);
 
-routerHospital.patch("/update/:id", updateHospital);
-
-export default routerHospital;
+export default routerHospital;

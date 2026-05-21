@@ -6,20 +6,11 @@ import Hospitalinfo from "../models/hospital.model.js";
 import { v2 as cloudinary } from "cloudinary";
 
 export const employeeSignup = async (req, res) => {
-
-    try {
-        cloudinary.config({
-            cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-            api_key: process.env.CLOUDINARY_API_KEY,
-            api_secret: process.env.CLOUDINARY_API_SECRET,
-        });
-    } catch (error) {
-        return res.status(500).json({
-            message: "Error while connecting to cloudinary",
-            success: false,
-            error: error.message,
-        });
-    }
+    cloudinary.config({
+        cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+        api_key: process.env.CLOUDINARY_API_KEY,
+        api_secret: process.env.CLOUDINARY_API_SECRET,
+    });
 
     try {
         const { fullName, phoneNumber, qualification, status, email, password, role, hospitalId } = req.body || {};
@@ -78,7 +69,7 @@ export const employeeSignup = async (req, res) => {
             fullName,
             phoneNumber,
             qualification,
-            profilePicture: cloudinaryUpload.secure_url,
+            employeeProfilePicture: cloudinaryUpload.secure_url,
             status,
             email,
             password: hashPassword,
@@ -113,7 +104,7 @@ export const employeeSignup = async (req, res) => {
                 fullName: employee.fullName,
                 phoneNumber: employee.phoneNumber,
                 qualification: employee.qualification,
-                profilePicture: employee.profilePicture,
+                employeeProfilePicture: employee.employeeProfilePicture,
                 status: employee.status,
                 email: employee.email,
                 role: employee.role,
@@ -183,7 +174,7 @@ export const employeeLogin = async (req, res) => {
                 fullName: employee.fullName,
                 phoneNumber: employee.phoneNumber,
                 qualification: employee.qualification,
-                profilePicture: employee.profilePicture,
+                employeeProfilePicture: employee.employeeProfilePicture,
                 status: employee.status,
                 email: employee.email,
                 role: employee.role,

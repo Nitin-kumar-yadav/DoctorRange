@@ -8,20 +8,11 @@ dotenv.config()
 
 
 export const signupHospital = async (req, res) => {
-
-    try {
-        cloudinary.config({
-            cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-            api_key: process.env.CLOUDINARY_API_KEY,
-            api_secret: process.env.CLOUDINARY_API_SECRET,
-        });
-    } catch (error) {
-        return res.status(500).json({
-            message: "Error while connecting to cloudinary",
-            success: false,
-            error: error.message,
-        });
-    }
+    cloudinary.config({
+        cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+        api_key: process.env.CLOUDINARY_API_KEY,
+        api_secret: process.env.CLOUDINARY_API_SECRET,
+    });
     try {
 
         const { hospitalName, hospitalAddress, hospitalPhone, hospitalEmail, hospitalPassword } = req.body || {}
@@ -154,5 +145,66 @@ export const loginHospital = async (req, res) => {
 }
 
 export const updateHospital = async (req, res) => {
-    
+    try {
+        const { id } = req.params;
+        const { hospitalName, hospitalAddress, hospitalPhone } = req.body || {};
+
+        if (!id) {
+            return res.status(400).json({
+                success: false,
+                message: "Hospital ID is required",
+                error: "Missing hospital ID in request params"
+            });
+        }
+
+        const updateFields = {};
+        if (hospitalName) updateFields.hospitalName = hospitalName;
+        if (hospitalAddress) updateFields.hospitalAddress = hospitalAddress;
+        if (hospitalPhone) {
+            if (!/^\d{10}$/.test(hospitalPhone)) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Phone number must be 10 digits",
+                    error: "Phone number must be 10 digits"
+                });
+            }
+            updateFields.hospitalPhone = hospitalPhone;
+        }
+
+        if (Object.keys(updateFields).length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "No fields to update",
+                error: "Provide at least one field to update: hospitalName, hospitalAddress, or hospitalPhone"
+            });
+        }
+
+        const updatedHospital = await Hospitalinfo.findByIdAndUpdate(
+            id,
+            { $set: updateFields },
+            { new: true, runValidators: true }
+        ).select("-hospitalPassword");
+
+        if (!updatedHospital) {
+            return res.status(404).json({
+                success: false,
+                message: "Hospital not found",
+                error: "No hospital found with the given ID"
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Hospital updated successfully",
+            hospital: updatedHospital
+        });
+
+    } catch (error) {
+        console.error("Error in updateHospital:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Hospital update failed",
+            error: error.message
+        });
+    }
 }
