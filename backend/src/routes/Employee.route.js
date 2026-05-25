@@ -6,8 +6,12 @@ import {
 import upload from "../lib/upload.js";
 import { upDateEmployeeProfile } from "../controllers/EmployeeEdit.controller.js";
 import { employeeAuthMiddleware } from "../middleware/empolyee.middleware.js";
+import { arcjetProtection } from "../middleware/archjet.middleware.js";
 
 const routerEmployee = express.Router();
+
+//TODO: Arcjet protection for all employee routes
+routerEmployee.use(arcjetProtection)
 
 //TODO: Employee Signup and Login routes
 routerEmployee.post(
