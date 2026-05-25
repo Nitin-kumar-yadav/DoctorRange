@@ -2,7 +2,7 @@ import express from "express";
 import { loginHospital, signupHospital, updateHospital } from "../controllers/Hospital.controller.js";
 import upload from "../lib/upload.js";
 import { hospitalAuthMiddleware } from "../middleware/hospital.middleware.js";
-import { arcjetProtection } from "../middleware/archjet.middleware.js";
+import { arcjetProtection } from "../middleware/arcjet.middleware.js";
 
 const routerHospital = express.Router();
 

@@ -6,7 +6,7 @@ import {
 import upload from "../lib/upload.js";
 import { upDateEmployeeProfile } from "../controllers/EmployeeEdit.controller.js";
 import { employeeAuthMiddleware } from "../middleware/empolyee.middleware.js";
-import { arcjetProtection } from "../middleware/archjet.middleware.js";
+import { arcjetProtection } from "../middleware/arcjet.middleware.js";
 
 const routerEmployee = express.Router();
 
