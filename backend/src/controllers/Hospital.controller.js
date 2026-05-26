@@ -147,7 +147,7 @@ export const loginHospital = async (req, res) => {
 export const updateHospital = async (req, res) => {
     try {
         const { hospitalName, hospitalAddress, hospitalPhone } = req.body || {};
-        const id = req.user._id;
+        const id = req.user?._id;
 
         if (!id) {
             return res.status(400).json({

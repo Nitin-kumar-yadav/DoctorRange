@@ -255,6 +255,12 @@ export const updatePatient = async (req, res) => {
         if (patientAllergies) patientData.patientAllergies = patientAllergies;
         if (patientMedications) patientData.patientMedications = patientMedications;
         if (patientStatus) patientData.patientStatus = patientStatus;
+        if (patientStatus === "admitted" && patientData.patientStatus !== "admitted") {
+            patientData.patientAdmittedAt = Date.now();
+        }
+        if (patientStatus === "Discharged" && patientData.patientStatus !== "Discharged") {
+            patientData.patientDischargedAt = Date.now();
+        }
 
         await patientData.save();
         return res.status(200).json({
@@ -339,14 +345,13 @@ export const getAllPatient = async (req, res) => {
         const employeeData = await Employeesinfo.findById(req.user?._id);
         if (!employeeData) {
             return res.status(404).json({
-                message: "Employee not found",
-                success: false,
-                error: "Employee not found"
-            });
-        }
-
         const patientData = await Patientinfo.find({ hospitalId: employeeData.hospitalId });
-        if (!patientData) {
+
+        return res.status(200).json({
+            message: "Patient data fetched successfully",
+            success: true,
+            patient: patientData
+        });
             return res.status(404).json({
                 message: "Patient not found",
                 success: false,
