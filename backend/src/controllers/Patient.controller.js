@@ -345,13 +345,14 @@ export const getAllPatient = async (req, res) => {
         const employeeData = await Employeesinfo.findById(req.user?._id);
         if (!employeeData) {
             return res.status(404).json({
-        const patientData = await Patientinfo.find({ hospitalId: employeeData.hospitalId });
+                message: "Employee not found",
+                success: false,
+                error: "Employee not found"
+            });
+        }
 
-        return res.status(200).json({
-            message: "Patient data fetched successfully",
-            success: true,
-            patient: patientData
-        });
+        const patientData = await Patientinfo.find({ hospitalId: employeeData.hospitalId });
+        if (!patientData) {
             return res.status(404).json({
                 message: "Patient not found",
                 success: false,
