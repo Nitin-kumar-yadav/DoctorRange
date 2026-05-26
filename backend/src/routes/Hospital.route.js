@@ -14,6 +14,6 @@ routerHospital.post("/signup", upload.single("hospitalLogo"), signupHospital);
 routerHospital.post("/login", loginHospital);
 
 //TODO: Update Hospital route
-routerHospital.patch("/update/:id", hospitalAuthMiddleware, updateHospital);
+routerHospital.patch("/update", hospitalAuthMiddleware, updateHospital);
 
 export default routerHospital;

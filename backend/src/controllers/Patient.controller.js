@@ -213,3 +213,159 @@ export const patientDisease = async (req, res) => {
         });
     }
 };
+
+export const updatePatient = async (req, res) => {
+    try {
+        const { patientId } = req.params;
+        const { patientName, patientAge, patientAddress, patientGender, patientBloodGroup, patientAllergies, patientMedications, patientStatus } = req.body || {};
+
+        const employeeData = await Employeesinfo.findById(req.user?._id);
+        if (!employeeData) {
+            return res.status(404).json({
+                message: "Employee not found",
+                success: false,
+                error: "Employee not found"
+            });
+        }
+
+        const isInvalid = (val) => !val || (Array.isArray(val) && val.length === 0);
+
+        if (isInvalid(patientId)) {
+            return res.status(400).json({
+                message: "Required fields are missing",
+                success: false,
+                error: "patientId is required"
+            });
+        }
+
+        const patientData = await Patientinfo.findById(patientId);
+        if (!patientData) {
+            return res.status(404).json({
+                message: "Patient not found",
+                success: false,
+                error: "Patient not found"
+            });
+        }
+
+        if (patientName) patientData.patientName = patientName;
+        if (patientAge) patientData.patientAge = patientAge;
+        if (patientAddress) patientData.patientAddress = patientAddress;
+        if (patientGender) patientData.patientGender = patientGender;
+        if (patientBloodGroup) patientData.patientBloodGroup = patientBloodGroup;
+        if (patientAllergies) patientData.patientAllergies = patientAllergies;
+        if (patientMedications) patientData.patientMedications = patientMedications;
+        if (patientStatus) patientData.patientStatus = patientStatus;
+
+        await patientData.save();
+        return res.status(200).json({
+            message: "Patient updated successfully",
+            success: true,
+            patient: patientData
+        });
+
+    } catch (error) {
+        console.error("Patient update error:", error);
+        return res.status(500).json({
+            message: "An error occurred while updating patient",
+            success: false,
+            error: "Internal server error"
+        });
+    }
+};
+
+
+export const deletePatient = async (req, res) => {
+    try {
+        const { id: patientId } = req.params
+        const employeeData = await Employeesinfo.findById(req.user?._id);
+
+        if (!employeeData) {
+            return res.status(404).json({
+                message: "Employee not found",
+                success: false,
+                error: "Employee not found"
+            });
+        }
+
+        const isInvalid = (val) => !val || (Array.isArray(val) && val.length === 0);
+
+        if (isInvalid(patientId)) {
+            return res.status(400).json({
+                message: "Required fields are missing",
+                success: false,
+                error: "patientId is required"
+            });
+        }
+
+        const patientData = await Patientinfo.findById(patientId);
+        if (!patientData) {
+            return res.status(404).json({
+                message: "Patient not found",
+                success: false,
+                error: "Patient not found"
+            });
+        }
+
+        if (patientData.hospitalId.toString() !== employeeData.hospitalId.toString()) {
+            return res.status(403).json({
+                message: "You are not authorized to delete this patient",
+                success: false,
+                error: "Unauthorized"
+            })
+        }
+
+        await patientData.deleteOne()
+
+        await PatientDisease.deleteMany({ patientId: patientId })
+        await PatientPrevHis.deleteMany({ patientId: patientId })
+
+        return res.status(200).json({
+            message: "Patient deleted successfully",
+            success: true,
+            patient: patientData
+        })
+    } catch (error) {
+        console.error("Patient delete error:", error);
+        return res.status(500).json({
+            message: "An error occurred while deleting patient",
+            success: false,
+            error: "Internal server error"
+        });
+    }
+}
+
+export const getAllPatient = async (req, res) => {
+    try {
+        const employeeData = await Employeesinfo.findById(req.user?._id);
+        if (!employeeData) {
+            return res.status(404).json({
+                message: "Employee not found",
+                success: false,
+                error: "Employee not found"
+            });
+        }
+
+        const patientData = await Patientinfo.find({ hospitalId: employeeData.hospitalId });
+        if (!patientData) {
+            return res.status(404).json({
+                message: "Patient not found",
+                success: false,
+                error: "Patient not found"
+            });
+        }
+
+        return res.status(200).json({
+            message: "Patient data fetched successfully",
+            success: true,
+            patient: patientData
+        });
+    }
+    catch (error) {
+        console.error("Patient get all error:", error);
+        return res.status(500).json({
+            message: "An error occurred while getting all patients",
+            success: false,
+            error: "Internal server error"
+        });
+    }
+}

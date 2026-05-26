@@ -146,14 +146,14 @@ export const loginHospital = async (req, res) => {
 
 export const updateHospital = async (req, res) => {
     try {
-        const { id } = req.params;
         const { hospitalName, hospitalAddress, hospitalPhone } = req.body || {};
+        const id = req.user._id;
 
         if (!id) {
             return res.status(400).json({
                 success: false,
                 message: "Hospital ID is required",
-                error: "Missing hospital ID in request params"
+                error: "Hospital not found"
             });
         }
 
