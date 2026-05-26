@@ -17,7 +17,7 @@ export const registerPatient = async (req, res) => {
     try {
         const { hospitalId, patientName, patientAge, patientEmail, patientPhone, patientAddress, patientGender, patientBloodGroup, patientAllergies, patientMedications, patientStatus } = req.body || {};
 
-        // req.user is set by employeeAuthMiddleware
+
         const hospitalEmployeeId = req.user?._id;
         if (!hospitalEmployeeId) {
             return res.status(401).json({
@@ -27,9 +27,8 @@ export const registerPatient = async (req, res) => {
             });
         }
 
-        // Validate required fields
+
         if (!hospitalId || !patientName || !patientAge || !patientPhone || !patientAddress || !patientGender) {
-            // Clean up uploaded file
             if (req.file?.path) fs.unlinkSync(req.file.path);
             return res.status(400).json({
                 message: "Required fields are missing",
@@ -71,7 +70,6 @@ export const registerPatient = async (req, res) => {
             });
         }
 
-        // Verify employee belongs to this hospital
         if (employeeData.hospitalId?.toString() !== hospitalId) {
             if (req.file?.path) fs.unlinkSync(req.file.path);
             return res.status(403).json({
@@ -81,7 +79,6 @@ export const registerPatient = async (req, res) => {
             });
         }
 
-        // Handle profile picture upload
         let patientProfilePicture = "";
         let cloudinaryPublicId = null;
         if (req.file) {
@@ -129,9 +126,8 @@ export const registerPatient = async (req, res) => {
         });
 
     } catch (error) {
-        // Clean up uploaded file on any error
         if (req.file?.path) {
-            try { fs.unlinkSync(req.file.path); } catch (_) { /* file may already be deleted */ }
+            try { fs.unlinkSync(req.file.path); } catch (_) { }
         }
         console.error("Patient registration error:", error);
         return res.status(500).json({
@@ -147,10 +143,8 @@ export const patientDisease = async (req, res) => {
         const { diseaseName, diagnosisMedicines, patientId } = req.body || {};
         const employeeId = req.user?._id;
 
-        // Helper function to check if a value is missing or an empty array
         const isInvalid = (val) => !val || (Array.isArray(val) && val.length === 0);
 
-        // 1. Improved Validation
         if (isInvalid(diseaseName) || isInvalid(diagnosisMedicines) || !patientId) {
             let errorDetail = "Required fields are missing";
             if (isInvalid(diseaseName)) errorDetail = "diseaseName is required";
@@ -164,7 +158,6 @@ export const patientDisease = async (req, res) => {
             });
         }
 
-        // 2. Fetch Employee
         const employeeData = await Employeesinfo.findById(employeeId);
         if (!employeeData) {
             return res.status(404).json({
@@ -174,7 +167,6 @@ export const patientDisease = async (req, res) => {
             });
         }
 
-        // 3. Fetch Patient
         const patientData = await Patientinfo.findById(patientId);
         if (!patientData) {
             return res.status(404).json({
@@ -184,20 +176,16 @@ export const patientDisease = async (req, res) => {
             });
         }
 
-        // 4. Create Record (Fixed Array Wrapping Bug)
         const disease = await PatientDisease.create({
             patientId: patientData._id,
             diseaseName: Array.isArray(diseaseName) ? diseaseName : [diseaseName],
             diagnosisMedicines: Array.isArray(diagnosisMedicines) ? diagnosisMedicines : [diagnosisMedicines],
         });
 
-        // 5. Create Previous History Record
         await PatientPrevHis.create({
             patientDiseaseId: disease._id,
             hospitalId: employeeData.hospitalId,
         });
-
-        // 6. Success Response
         return res.status(201).json({
             message: "Patient disease updated successfully",
             success: true,
