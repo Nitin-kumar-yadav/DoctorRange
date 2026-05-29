@@ -14,6 +14,6 @@ patientRouter.get('/', employeeAuthMiddleware, getAllPatient)
 patientRouter.post("/register", employeeAuthMiddleware, upload.single("patientProfilePicture"), registerPatient)
 patientRouter.post('/disease', employeeAuthMiddleware, patientDisease)
 patientRouter.patch('/update/:patientId', employeeAuthMiddleware, upload.single("patientProfilePicture"), updatePatient)
-patientRouter.delete('/delete/:id', employeeAuthMiddleware, deletePatient)
+patientRouter.delete('/delete/:patientId', employeeAuthMiddleware, deletePatient)
 
 export default patientRouter;

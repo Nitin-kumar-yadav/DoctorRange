@@ -270,7 +270,7 @@ export const updatePatient = async (req, res) => {
 
 export const deletePatient = async (req, res) => {
     try {
-        const { id: patientId } = req.params
+        const { patientId } = req.params
         const employeeData = await Employeesinfo.findById(req.user?._id);
 
         if (!employeeData) {
