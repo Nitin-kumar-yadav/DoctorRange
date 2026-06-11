@@ -29,10 +29,22 @@ const hospitalSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    employees: [
+    staffs: [
         {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Employeesinfo"
+        }
+    ],
+    doctors: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Doctorinfo"
+        }
+    ],
+    appointments: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Appointment"
         }
     ],
 }, { timestamps: true });
