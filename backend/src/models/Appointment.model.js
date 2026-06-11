@@ -3,17 +3,19 @@ import mongoose from "mongoose";
 const appointmentSchema = new mongoose.Schema({
     patient: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Patient"
+        ref: "Patient",
+        required: true
     },
     doctor: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Doctor"
+        ref: "Doctor",
+        required: true
     },
     hospital: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Hospital"
-    },
-    date: {
+        ref: "Hospital",
+        required: true
+    }, date: {
         type: Date,
         required: true
     },
