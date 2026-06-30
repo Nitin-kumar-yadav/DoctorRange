@@ -47,6 +47,14 @@ const hospitalSchema = new mongoose.Schema({
             ref: "Appointment"
         }
     ],
+    doctorCharge: {
+        type: Number,
+        required: true
+    },
+    hospitalCharge: {
+        type: Number,
+        required: true
+    }
 }, { timestamps: true });
 
 

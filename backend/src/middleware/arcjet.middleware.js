@@ -5,13 +5,13 @@ export const arcjetProtection = async (req, res, next) => {
   try {
     const decision = await aj.protect(req)
     if (decision.isDenied()) {
-      if (decision.reason.isRateLimit()) {
+      if (decision.reason.isRateLimit({ window: '1m', max: 20 })) {
         return res.status(429).json({ message: 'Rate limit exceeded. Please try again later.' })
       }
-      else if (decision.reason.isBot()) {
+      else if (decision.reason.isBot({ window: '1m', max: 20 })) {
         return res.status(403).json({ message: 'Bot access denied.' })
       }
-      else if (decision.reason.isProxy()) {
+      else if (decision.reason.isProxy({ window: '1m', max: 20 })) {
         return res.status(403).json({ message: 'Proxy access denied.' })
       }
       else {

@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import routerEmployee from "./routes/Employee.route.js";
 import patientRouter from "./routes/patient.route.js";
+import routerPayment from "./routes/Payment.route.js";
 dotenv.config({ path: "./.env" });
 const app = express();
 
@@ -34,7 +35,7 @@ app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 
 //TODO: Test API
 app.get("/api/v1/test", (req, res) => {
-    res.status(200).json({ message: "Welcome to DoctorRange API" });
+    res.status(200).json({ message: "Welcome to DoctorRange API, Developed by Nitin Kumar Yadav" });
 });
 
 //TODO: Health check API
@@ -50,6 +51,9 @@ app.use("/api/v1/employee", routerEmployee);
 
 //TODO: Patient route
 app.use("/api/v1/patient", patientRouter);
+
+//TODO: Payment route
+app.use("/api/v1/payment", routerPayment);
 
 //TODO: Database connection & Server start
 const startServer = async () => {
