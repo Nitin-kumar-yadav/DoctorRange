@@ -1,3 +1,4 @@
+import Appointment from "../models/Appointment.model.js";
 import Employeesinfo from "../models/employees.model.js";
 import Hospitalinfo from "../models/hospital.model.js";
 import Patientinfo from "../models/patient.model.js";
@@ -15,10 +16,10 @@ export const registerPatient = async (req, res) => {
     });
 
     try {
-        const { hospitalId, patientName, patientAge, patientEmail, patientPhone, patientAddress, patientGender, patientBloodGroup, patientAllergies, patientMedications, patientStatus } = req.body || {};
+        const { hospitalId, patientBloodGroup, patientAllergies, patientMedications, patientStatus } = req.body || {};
 
 
-        const hospitalEmployeeId = req.user?._id;
+        const hospitalEmployeeId = req.user?._id || req?.cookies?._id;
         if (!hospitalEmployeeId) {
             return res.status(401).json({
                 message: "Unauthorized access",
@@ -28,12 +29,12 @@ export const registerPatient = async (req, res) => {
         }
 
 
-        if (!hospitalId || !patientName || !patientAge || !patientPhone || !patientAddress || !patientGender) {
+        if (!hospitalId) {
             if (req.file?.path) fs.unlinkSync(req.file.path);
             return res.status(400).json({
                 message: "Required fields are missing",
                 success: false,
-                error: "hospitalId, patientName, patientAge, patientPhone, patientAddress, and patientGender are required"
+                error: "hospitalId and appointmentId are required"
             });
         }
 
@@ -94,18 +95,11 @@ export const registerPatient = async (req, res) => {
         const patient = new Patientinfo({
             hospitalId: isHospitalExist._id,
             hospitalEmployeeId: employeeData._id,
-            patientName,
-            patientAge,
-            patientEmail,
-            patientPhone,
-            patientAddress,
-            patientGender,
             patientBloodGroup,
             patientAllergies,
             patientMedications,
             patientProfilePicture,
-            patientStatus,
-            patientAdmittedBy: employeeData._id,
+            patientStatus
         });
         if (patient.patientStatus === "admitted") {
             patient.patientAdmittedAt = Date.now();
@@ -118,6 +112,7 @@ export const registerPatient = async (req, res) => {
             }
             throw saveError;
         }
+
 
         return res.status(201).json({
             message: "Patient registered successfully",

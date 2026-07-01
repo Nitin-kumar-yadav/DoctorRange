@@ -11,7 +11,7 @@ patientRouter.use(arcjetProtection)
 
 //TODO: Patient registration and disease routes
 patientRouter.get('/', employeeAuthMiddleware, getAllPatient)
-patientRouter.post("/register", employeeAuthMiddleware, upload.single("patientProfilePicture"), registerPatient)
+// patientRouter.post("/register", employeeAuthMiddleware, upload.single("patientProfilePicture"), registerPatient)
 patientRouter.post('/disease', employeeAuthMiddleware, patientDisease)
 patientRouter.patch('/update/:patientId', employeeAuthMiddleware, upload.single("patientProfilePicture"), updatePatient)
 patientRouter.delete('/delete/:patientId', employeeAuthMiddleware, deletePatient)

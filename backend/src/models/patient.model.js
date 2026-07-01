@@ -1,11 +1,31 @@
 import mongoose from "mongoose";
 
 const patientSchema = new mongoose.Schema({
-    appointmentId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Appointment",
+    patientName: {
+        type: String,
+        required: true
+    },
+    patientPhone: {
+        type: String,
         required: true,
+        unique: true,
         index: true
+    },
+    patientEmail: {
+        type: String,
+        unique: true
+    },
+    patientAddress: {
+        type: String
+    },
+    patientGender: {
+        type: String,
+        enum: ["male", "female", "other"],
+        required: true
+    },
+    patientAge: {
+        type: Number,
+        required: true
     },
     patientBloodGroup: {
         type: String,
@@ -36,8 +56,7 @@ const patientSchema = new mongoose.Schema({
     },
     patientAdmittedBy: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Employeesinfo",
-        index: true,
+        ref: "Employeesinfo"
     }
 
 }, { timestamps: true })

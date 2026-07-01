@@ -7,6 +7,7 @@ import cors from "cors";
 import routerEmployee from "./routes/Employee.route.js";
 import patientRouter from "./routes/patient.route.js";
 import routerPayment from "./routes/Payment.route.js";
+import routerAppointment from "./routes/Appointment.route.js";
 dotenv.config({ path: "./.env" });
 const app = express();
 
@@ -54,6 +55,9 @@ app.use("/api/v1/patient", patientRouter);
 
 //TODO: Payment route
 app.use("/api/v1/payment", routerPayment);
+
+//TODO: Appointment route
+app.use("/api/v1/appointment", routerAppointment);
 
 //TODO: Database connection & Server start
 const startServer = async () => {
