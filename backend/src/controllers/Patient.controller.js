@@ -34,7 +34,7 @@ export const registerPatient = async (req, res) => {
             return res.status(400).json({
                 message: "Required fields are missing",
                 success: false,
-                error: "hospitalId and appointmentId are required"
+                error: "hospitalId is required"
             });
         }
 

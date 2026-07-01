@@ -11,11 +11,10 @@ import { arcjetProtection } from "../middleware/arcjet.middleware.js";
 const routerEmployee = express.Router();
 
 
-routerEmployee.post("/login", employeeLogin);
+routerEmployee.post("/login", arcjetProtection, employeeLogin);
 
 //TODO: Arcjet protection for all employee routes
 routerEmployee.use(arcjetProtection)
-
 //TODO: Employee Signup and Login routes
 routerEmployee.post(
   "/signup",
