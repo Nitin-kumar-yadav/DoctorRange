@@ -4,6 +4,6 @@ import { employeeAuthMiddleware } from "../middleware/empolyee.middleware.js"
 
 const routerPayment = express.Router()
 
-routerPayment.post('/create-payment', employeeAuthMiddleware, createPayment)
+routerPayment.post('/create-payment/:_id', employeeAuthMiddleware, createPayment)
 
 export default routerPayment

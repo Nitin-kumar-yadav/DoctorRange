@@ -11,7 +11,7 @@ import { arcjetProtection } from "../middleware/arcjet.middleware.js";
 const routerEmployee = express.Router();
 
 
-routerEmployee.post("/login", arcjetProtection, employeeLogin);
+routerEmployee.post("/login", employeeLogin);
 
 //TODO: Arcjet protection for all employee routes
 routerEmployee.use(arcjetProtection)
